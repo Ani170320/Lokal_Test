@@ -101,14 +101,14 @@ const App = () => {
         
         {item.company && (
           <View style={styles.detailItem}>
-            <Text style={styles.detailIcon}>🏢</Text>
+            <Text style={styles.detailIcon}></Text>
             <Text style={styles.detailText}>{item.company}</Text>
           </View>
         )}
         
         {item.primary_details?.Salary && (
           <View style={styles.detailItem}>
-            <Text style={styles.detailIcon}>💰</Text>
+            <Text style={styles.detailIcon}></Text>
             <Text style={styles.detailText}>{item.primary_details.Salary}</Text>
           </View>
         )}
