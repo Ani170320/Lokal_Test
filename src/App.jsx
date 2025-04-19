@@ -7,7 +7,11 @@ import {
   SafeAreaView,
   StatusBar,
   TouchableOpacity,
+  StyleSheet,
+  Dimensions,
 } from 'react-native';
+
+const { width } = Dimensions.get('window');
 
 const App = () => {
   const [jobs, setJobs] = useState([]);
@@ -47,9 +51,9 @@ const App = () => {
     if (!loading) return null;
     return (
       <ActivityIndicator
-        style={{ margin: 16 }}
+        style={styles.loader}
         size="large"
-        color="#007AFF"
+        color={styles.theme.primary}
       />
     );
   };
@@ -57,8 +61,8 @@ const App = () => {
   const renderEmpty = () => {
     if (loading) return null;
     return (
-      <View style={{ alignItems: 'center', marginTop: 30 }}>
-        <Text>No jobs available.</Text>
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>No jobs available.</Text>
       </View>
     );
   };
@@ -66,51 +70,68 @@ const App = () => {
   const renderError = () => {
     if (!error) return null;
     return (
-      <View style={{ alignItems: 'center', marginTop: 30 }}>
-        <Text style={{ color: 'red', fontSize: 16, marginBottom: 10 }}>{error}</Text>
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>{error}</Text>
         <TouchableOpacity
           onPress={fetchJobs}
-          style={{
-            backgroundColor: '#007AFF',
-            paddingHorizontal: 20,
-            paddingVertical: 8,
-            borderRadius: 6,
-          }}
+          style={styles.retryButton}
         >
-          <Text style={{ color: '#fff' }}>Retry</Text>
+          <Text style={styles.retryText}>Retry</Text>
         </TouchableOpacity>
       </View>
     );
   };
 
   const renderItem = ({ item }) => (
-    <View
-      style={{
-        backgroundColor: '#f0f4ff',
-        padding: 15,
-        borderRadius: 10,
-        marginVertical: 8,
-        elevation: 2,
-      }}
-    >
-      <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#333' }}>
-        {item.title}
-      </Text>
-      <Text style={{ fontSize: 14, color: '#555', marginTop: 4 }}>
-        {item.primary_details?.Place || 'Location not specified'}
-      </Text>
-    </View>
+    <TouchableOpacity style={styles.jobCard}>
+      <View style={styles.jobHeader}>
+        <Text style={styles.jobTitle}>{item.title}</Text>
+        <View style={styles.badge}>
+          <Text style={styles.badgeText}>New</Text>
+        </View>
+      </View>
+      
+      <View style={styles.jobDetails}>
+        <View style={styles.detailItem}>
+          <Text style={styles.detailIcon}>📍</Text>
+          <Text style={styles.detailText}>
+            {item.primary_details?.Place || 'Location not specified'}
+          </Text>
+        </View>
+        
+        {item.company && (
+          <View style={styles.detailItem}>
+            <Text style={styles.detailIcon}>🏢</Text>
+            <Text style={styles.detailText}>{item.company}</Text>
+          </View>
+        )}
+        
+        {item.primary_details?.Salary && (
+          <View style={styles.detailItem}>
+            <Text style={styles.detailIcon}>💰</Text>
+            <Text style={styles.detailText}>{item.primary_details.Salary}</Text>
+          </View>
+        )}
+      </View>
+      
+      <View style={styles.jobFooter}>
+        <Text style={styles.postedDate}>
+          {item.created_at ? `Posted: ${new Date(item.created_at).toLocaleDateString()}` : 'Recently posted'}
+        </Text>
+        <TouchableOpacity style={styles.applyButton}>
+          <Text style={styles.applyText}>Apply</Text>
+        </TouchableOpacity>
+      </View>
+    </TouchableOpacity>
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff', paddingHorizontal: 10 }}>
-      <StatusBar barStyle="dark-content" />
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor={styles.theme.background} />
       
-      {/* Job List Title */}
-      <View style={{ paddingVertical: 12 }}>
-        <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center', color: '#333' }}>
-          Job List
-        </Text>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Job Opportunities</Text>
+        <Text style={styles.headerSubtitle}>Find your next career move</Text>
       </View>
 
       {renderError()}
@@ -122,9 +143,171 @@ const App = () => {
         ListFooterComponent={renderFooter}
         onEndReached={fetchJobs}
         onEndReachedThreshold={0.5}
+        contentContainerStyle={styles.listContent}
       />
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  theme: {
+    primary: '#4B6BFB',
+    secondary: '#3B82F6',
+    background: '#F9FAFC',
+    card: '#FFFFFF',
+    text: '#1F2937',
+    textLight: '#6B7280',
+    border: '#E5E7EB',
+    success: '#10B981',
+    error: '#EF4444',
+  },
+  container: {
+    flex: 1,
+    backgroundColor: '#F9FAFC',
+  },
+  header: {
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+    marginBottom: 8,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1F2937',
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginTop: 4,
+  },
+  listContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 20,
+  },
+  jobCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    marginVertical: 8,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  jobHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  jobTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1F2937',
+    flex: 1,
+  },
+  badge: {
+    backgroundColor: '#EBF5FF',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  badgeText: {
+    color: '#4B6BFB',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  jobDetails: {
+    marginBottom: 12,
+  },
+  detailItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  detailIcon: {
+    fontSize: 14,
+    marginRight: 8,
+  },
+  detailText: {
+    fontSize: 14,
+    color: '#6B7280',
+  },
+  jobFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+  },
+  postedDate: {
+    fontSize: 12,
+    color: '#6B7280',
+  },
+  applyButton: {
+    backgroundColor: '#4B6BFB',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 6,
+  },
+  applyText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    marginTop: 40,
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderStyle: 'dashed',
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#6B7280',
+    textAlign: 'center',
+  },
+  errorContainer: {
+    alignItems: 'center',
+    marginTop: 20,
+    marginHorizontal: 16,
+    padding: 16,
+    backgroundColor: '#FEF2F2',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#FECACA',
+  },
+  errorText: {
+    color: '#B91C1C',
+    fontSize: 16,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  retryButton: {
+    backgroundColor: '#EF4444',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  retryText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+  },
+  loader: {
+    marginVertical: 20,
+  },
+});
 
 export default App;
